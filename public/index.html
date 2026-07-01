@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Optimization Hub | Automated Video Node</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-cyan-500 selection:text-slate-950">
+
+    <main class="max-w-md mx-auto h-screen flex flex-col justify-between border-x border-slate-900 bg-black/60 relative">
+        
+        <header class="p-4 border-b border-slate-900 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50 flex items-center justify-between">
+            <span class="text-xs font-black tracking-widest text-cyan-400 uppercase">Hardware Engine Feed</span>
+            <div class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
+        </header>
+
+        <section class="flex-1 flex flex-col items-center justify-center p-4 overflow-hidden relative">
+            <div class="w-full aspect-[9/16] max-h-[70vh] bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800 relative group">
+                <video id="short-viewport" controls autoplay loop muted class="w-full h-full object-cover"></video>
+            </div>
+        </section>
+
+        <section class="p-4 bg-slate-950 border-t border-slate-900 space-y-4">
+            <div class="space-y-1">
+                <h2 class="text-sm font-bold text-white tracking-tight">Setup Link Optimization Notice</h2>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Physical hardware links stop streaming bottlenecks immediately. Switch from Wi-Fi congestion to structured lines.
+                </p>
+            </div>
+
+            <a href="https://www.amazon.com/s?k=Cat8+Ethernet+Cable&tag=timevalue0e2-20" target="_blank" rel="noopener nofollow" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-slate-950 font-black text-xs text-center py-3 rounded-xl transition duration-150 tracking-wider uppercase block">
+                Verify Dedicated Hardware Availability
+            </a>
+
+            <footer class="text-center text-[9px] text-slate-600">
+                As an Amazon Associate I earn from qualifying purchases. Price structures manage dynamic verification rules on Amazon.com.
+            </footer>
+        </section>
+    </main>
+
+    <script>
+        async function bootstrapVideoFeed() {
+            const player = document.getElementById('short-viewport');
+            try {
+                const response = await fetch('/clips/registry.json');
+                const fileList = await response.json();
+                if(fileList && fileList.length > 0) {
+                    // Pull latest rendered short video track
+                    player.src = `/clips/${fileList[fileList.length - 1]}`;
+                } else {
+                    console.log("No compiled video segments found inside directory schema.");
+                }
+            } catch (error) {
+                console.error("Failed to parse static video asset paths:", error);
+            }
+        }
+        window.addEventListener('DOMContentLoaded', bootstrapVideoFeed);
+    </script>
+</body>
+</html>
