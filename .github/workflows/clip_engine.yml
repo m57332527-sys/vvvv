@@ -22,12 +22,11 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y ffmpeg imagemagick
-        # Overwrite restrictive ImageMagick security rules for automated font rendering
         sudo sed -i 's/domain="path" rights="none"/domain="path" rights="read|write"/g' /etc/ImageMagick-6/policy.xml
 
-    - name: Install Compute Core Libraries
+    - name: Install Compute Core Libraries & Downloader
       run: |
-        pip install numpy pydub moviepy
+        pip install numpy pydub moviepy yt-dlp
 
     - name: Parse Pipeline Target Input
       id: fetch-url
@@ -35,16 +34,14 @@ jobs:
         URL=$(head -n 1 video_pool.txt)
         echo "TARGET_URL=$URL" >> $GITHUB_ENV
 
-    - name: Run Processing Automation Pipeline
+    - name: Run Processing Automation Pipeline (Direct YouTube Download)
       run: |
-        # In a free environment, down-sample external files to local scratch spaces
-        # Adjust downloading tooling as required based on your exact source path format
-        curl -L -o target_source.mp4 "${{ env.TARGET_URL }}"
+        #yt-dlp automatically extracts the best video stream natively on the runner
+        yt-dlp -f "best[ext=mp4]" "${{ env.TARGET_URL }}" -o target_source.mp4
         python process_video.py target_source.mp4
 
     - name: Optimize Generated Asset Registry
       run: |
-        # Programmatically write out modern dynamic directory index array for the frontend client
         echo "[" > public/clips/registry.json
         first=true
         for file in public/clips/*.mp4; do
