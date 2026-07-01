@@ -1,0 +1,65 @@
+name: Independent Automated Clipping Pipeline
+
+on:
+  push:
+    paths:
+      - 'video_pool.txt'
+
+jobs:
+  build-and-compile:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Access Repository Context
+      uses: actions/checkout@v4
+
+    - name: Initialize Runtime Environment
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+
+    - name: Deploy Binary Packages
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg imagemagick
+        # Overwrite restrictive ImageMagick security rules for automated font rendering
+        sudo sed -i 's/domain="path" rights="none"/domain="path" rights="read|write"/g' /etc/ImageMagick-6/policy.xml
+
+    - name: Install Compute Core Libraries
+      run: |
+        pip install numpy pydub moviepy
+
+    - name: Parse Pipeline Target Input
+      id: fetch-url
+      run: |
+        URL=$(head -n 1 video_pool.txt)
+        echo "TARGET_URL=$URL" >> $GITHUB_ENV
+
+    - name: Run Processing Automation Pipeline
+      run: |
+        # In a free environment, down-sample external files to local scratch spaces
+        # Adjust downloading tooling as required based on your exact source path format
+        curl -L -o target_source.mp4 "${{ env.TARGET_URL }}"
+        python process_video.py target_source.mp4
+
+    - name: Optimize Generated Asset Registry
+      run: |
+        # Programmatically write out modern dynamic directory index array for the frontend client
+        echo "[" > public/clips/registry.json
+        first=true
+        for file in public/clips/*.mp4; do
+          if [ -f "$file" ]; then
+            filename=$(basename "$file")
+            if [ "$first" = true ]; then first=false; else echo "," >> public/clips/registry.json; fi
+            echo "\"$filename\"" >> public/clips/registry.json
+          fi
+        done
+        echo "]" >> public/clips/registry.json
+
+    - name: Direct Deploy Payload to Vercel
+      uses: amondnet/vercel-action@v25
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        vercel-args: '--prod'
